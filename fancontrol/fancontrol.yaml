@@ -1,5 +1,5 @@
 blueprint:
-  name: MOES Remote ⟷ IR-Code Pairing (4-button)
+  name: Fan Control (Off / 1 / 2 / 3)
   description: >
     Map up to four actions from a MOES/Tuya Zigbee remote (TS004F)
     to four arbitrary base-64 IR strings.  Works out-of-the-box for
