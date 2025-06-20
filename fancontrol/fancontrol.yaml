@@ -1,91 +1,112 @@
 blueprint:
-  name: Fan Control (Off / 1 / 2 / 3)
+  name: MOES Remote ⟷ IR-Code Pairing (4-button)
   description: >
-    Uses four buttons on a MOES/Tuya Zigbee remote (TS004F) to send
-    the correct IR code—fan OFF, speed 1, 2 or 3—via an IR blaster
-    that exposes a text entity.
+    Map up to four actions from a MOES/Tuya Zigbee remote (TS004F)
+    to four arbitrary base-64 IR strings.  Works out-of-the-box for
+    Westinghouse ceiling-fan receivers but is fully re-mappable.
+
   domain: automation
-  source_url: https://gist.github.com/your-gist-url   # optional
+
   input:
     remote_device:
-      name: Remote (MOES TS004F)
-      description: Select the Zigbee/MQTT remote whose buttons fire the triggers.
+      name: Remote (TS004F)
+      description: The Zigbee device that produces the MQTT `action` events.
       selector:
         device:
-          integration: mqtt
+          integration: mqtt            # change if you use ZHA
+
     text_entity:
       name: IR command text entity
-      description: The *text* entity that your IR blaster monitors and sends.
+      description: The *text* entity your IR blaster watches and auto-sends.
       selector:
         entity:
           domain: text
-    fan_off_code:
-      name: IR code – Fan OFF
-      description: Base-64 string that turns the fan off.
+
+    # ─────────────── Pair #1 ───────────────
+    pair1_subtype:
+      name: Remote action #1
+      description: Paste the `subtype` string for the first button/action.
+      default: "1_single"
       selector:
         text:
+    pair1_code:
+      name: IR code #1
+      description: Base-64 IR payload to send for action #1.
       default: "A/MEpwFAAwPcAfME4AcDBfMEpwGnAUAFwAMBJSDACQGnAcAJ4AEHEfMEpwGnAfMEpwHzBKcB8wTcAQ=="
-    fan_1_code:
-      name: IR code – Fan 1
-      description: Base-64 string for speed 1.
       selector:
         text:
+
+    # ─────────────── Pair #2 ───────────────
+    pair2_subtype:
+      name: Remote action #2
+      default: "2_single"
+      selector: {text: {}}
+    pair2_code:
+      name: IR code #2
       default: "A/cElAFAAwPCAfcE4BMDAJQgHwX3BMsc9wRACQGUAcArAZQB4AEDwBPABwH3BOAJL8AbwAdAP8ALAfcE4AUv4AMbQCNAD+ACAwIE9wQ="
-    fan_2_code:
-      name: IR code – Fan 2
-      description: Base-64 string for speed 2.
-      selector:
-        text:
+      selector: {text: {}}
+
+    # ─────────────── Pair #3 ───────────────
+    pair3_subtype:
+      name: Remote action #3
+      default: "3_single"
+      selector: {text: {}}
+    pair3_code:
+      name: IR code #3
       default: "A/QElQFAAwPCAfQEwAMAleACC0ATA/QElQFABwfCAR0g9ASVAUADA8IB9ATgDwMB9ASAHwGVAeARLwGVAeABAwP0BJUBQEsBlQFAL4AJQAXgCwMNlQH0BPQEwgGVAfQElQE="
-    fan_3_code:
-      name: IR code – Fan 3
-      description: Base-64 string for speed 3.
-      selector:
-        text:
+      selector: {text: {}}
+
+    # ─────────────── Pair #4 ───────────────
+    pair4_subtype:
+      name: Remote action #4
+      default: "4_single"
+      selector: {text: {}}
+    pair4_code:
+      name: IR code #4
       default: "A/cElAFAAwPBAfcEwAMB9wTgBQ9AFwL3BJQgIQPRHPcEQAcBlAFAE8ADAfcE4AUPBZQB9wT3BEAF4AUvQBFAMwP3BJQBQAfgAwMF9wSUAfcE4AUvwB8D9wSUAcALwAcF9wSUAfcE"
+      selector: {text: {}}
 
 mode: single
 
+# ─────────────── Variables ───────────────
 variables:
   ir_codes:
-    fan_off: !input fan_off_code
-    fan_1:  !input fan_1_code
-    fan_2:  !input fan_2_code
-    fan_3:  !input fan_3_code
+    p1: !input pair1_code
+    p2: !input pair2_code
+    p3: !input pair3_code
+    p4: !input pair4_code
 
+# ─────────────── Triggers ───────────────
 trigger:
-  # Fan OFF (button 1)
   - platform: device
     device_id: !input remote_device
     domain: mqtt
     type: action
-    subtype: 1_single
-    id: fan_off
+    subtype: !input pair1_subtype
+    id: p1
 
-  # Fan 1 (button 2)
   - platform: device
     device_id: !input remote_device
     domain: mqtt
     type: action
-    subtype: 2_single
-    id: fan_1
+    subtype: !input pair2_subtype
+    id: p2
 
-  # Fan 2 (button 3)
   - platform: device
     device_id: !input remote_device
     domain: mqtt
     type: action
-    subtype: 3_single
-    id: fan_2
+    subtype: !input pair3_subtype
+    id: p3
 
-  # Fan 3 (button 4)
   - platform: device
     device_id: !input remote_device
     domain: mqtt
     type: action
-    subtype: 4_single
-    id: fan_3
+    subtype: !input pair4_subtype
+    id: p4
 
+# ─────────────── Action ───────────────
 action:
   - service: text.set_value
     target:
