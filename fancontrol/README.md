@@ -1,38 +1,42 @@
 # MOES Uzaktan Kumanda – Fan Control Blueprint  
-*A Home Assistant automation blueprint for driving a ceiling-fan IR blaster with a MOES / Tuya Zigbee remote (TS004F).*
+*A Home Assistant automation blueprint that drives a ceiling-fan IR blaster with a MOES / Tuya Zigbee remote (TS004F).*
+
+> **Out-of-the-box compatibility:**  
+> The four default IR strings included in this blueprint have been tested and verified to work with standard **Westinghouse ceiling-fan receivers**. If your fan is a different brand or model, simply paste in your own base-64 codes during set-up.
 
 ---
 
 ## What it does
-This blueprint merges four separate automations (Fan **OFF**, **1**, **2**, **3**) into one tidy package:
+This blueprint rolls four separate automations (Fan **OFF**, **1**, **2**, **3**) into a single, tidy package:
 
-| Remote Button | IR Action |
-| ------------- | --------- |
-| 1 × Press (1) | Fan OFF |
-| 1 × Press (2) | Fan Speed 1 |
-| 1 × Press (3) | Fan Speed 2 |
-| 1 × Press (4) | Fan Speed 3 |
+| Remote Button | IR Action | Default Westinghouse Code |
+| ------------- | --------- | ------------------------- |
+| 1 × Press (1) | Fan **OFF** | `A/MEpwFAAwPcAfME4A…TcAQ==` |
+| 1 × Press (2) | Fan Speed **1** | `A/cElAFAAwPCAfcE4B…AwIE9wQ=` |
+| 1 × Press (3) | Fan Speed **2** | `A/QElQFAAwPCAfQEwA…fQElQE=` |
+| 1 × Press (4) | Fan Speed **3** | `A/cElAFAAwPBAfcEwA…f9wSUAfcE` |
 
-It simply writes a base-64 IR string to a **text** entity that your IR blaster monitors—no extra “send” step needed.
+It simply writes the selected IR string to a **text** entity that your IR blaster watches—no extra “send” step needed.
 
 ---
 
 ## Prerequisites
-* **Home Assistant 2023.6 +** (blueprint format)
+* **Home Assistant 2023.6 or newer** (blueprint format)
 * MOES/Tuya Zigbee 4-button remote **TS004F** exposed via ZHA or Zigbee2MQTT  
-  (Anything that produces `mqtt action` triggers with `subtype: 1_single … 4_single` will work.)
+  (Anything producing `mqtt action` triggers with `subtype: 1_single … 4_single` will work.)
 * An IR blaster that
   * exposes a **`text`** entity for the raw command, **and**
-  * automatically transmits when that entity changes.  
+  * automatically transmits whenever that entity changes.  
   (Many Tuya Wi-Fi or Broadlink DIY devices behave this way.)
+* *(Optional)* Different fan brand? Have your own **base-64** IR strings handy so you can paste them into the blueprint inputs.
 
 ---
 
 ## Installation
 1. **Copy** `moes_fan_control.yaml` into  
    `config/blueprints/automation/moes_fan_control.yaml`  
-   *or* use **Settings ▸ Blueprints ▸ Import Blueprint** and paste the raw file URL.
-2. **Reload Blueprints** (or restart HA).
+   *or* use **Settings ▸ Blueprints ▸ Import Blueprint** and paste the raw file URL.  
+2. **Reload Blueprints** (or restart Home Assistant).
 
 ---
 
@@ -41,19 +45,19 @@ It simply writes a base-64 IR string to a **text** entity that your IR blaster m
 2. Fill in the required fields:  
    * **Remote device** – select your TS004F remote  
    * **Text entity** – pick the `text.*` entity on your IR blaster  
-   * **IR codes** – keep the defaults or paste your own base-64 strings
+   * *Optional* – replace the default IR strings if you’re not using a Westinghouse fan  
 3. **Save** and test each button—done!
 
 ---
 
 ## Customisation
-* **Change IR codes** any time in the automation’s *Variables* section.
-* **Add more speeds**: duplicate a trigger/input pair (`fan_4`, `subtype: 5_single`, etc.).
+* **Swap IR codes** any time in the automation’s *Variables* section.
+* **Add more speeds or functions**: duplicate a trigger/input pair (`subtype: 5_single`, etc.) and provide the matching code.
 * **Long-press actions**: copy a trigger with `subtype: 1_long` and add a corresponding IR string.
-* **Other devices**: swap the IR strings for light, heater, or A/C commands—whatever your blaster supports.
+* **Other devices**: exchange the IR payloads for light, heater, or A/C commands—whatever your blaster supports.
 
 ---
 
 ## Credits
 Blueprint by **\<your name or handle\>**.  
-Original standalone automations contributed by the Home Assistant community.
+Default IR payloads validated against a Westinghouse ceiling-fan receiver.
