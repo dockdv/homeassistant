@@ -23,13 +23,13 @@ blueprint:
 
     no_motion_duration:
       name: No-motion delay (s)
-      default: 60
+      default: 60        # change this default if you like
       selector:
         number:
-          min: 10
-          max: 300
+          min: 1         # keep if you still want a lower bound; remove if not needed
           unit_of_measurement: seconds
-          mode: slider
+          mode: box
+
 
 trigger:
   - platform: state
