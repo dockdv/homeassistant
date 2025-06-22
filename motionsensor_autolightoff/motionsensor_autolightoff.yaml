@@ -1,0 +1,66 @@
+blueprint:
+  name: Motion Light with Auto-Off Timer
+  description: Turn on a light when motion is detected and automatically turn it off after no motion is detected
+  domain: automation
+  input:
+    motion_sensor:
+      name: Motion Sensor
+      description: The motion sensor that triggers the light
+      selector:
+        device:
+          filter:
+            - domain: binary_sensor
+              device_class: motion
+            - domain: binary_sensor
+              device_class: occupancy
+    light_switch:
+      name: Light Switch
+      description: The light switch to control
+      selector:
+        device:
+          filter:
+            - domain: switch
+            - domain: light
+    no_motion_duration:
+      name: No Motion Duration
+      description: How long to wait after no motion before turning off the light
+      default: 60
+      selector:
+        number:
+          min: 10
+          max: 300
+          unit_of_measurement: seconds
+          mode: slider
+
+trigger:
+  - platform: state
+    entity_id: !input motion_sensor
+    to: "on"
+    id: motion_detected
+  - platform: state
+    entity_id: !input motion_sensor
+    to: "off"
+    for:
+      seconds: !input no_motion_duration
+    id: no_motion
+
+condition: []
+
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: motion_detected
+        sequence:
+          - service: homeassistant.turn_on
+            target:
+              device_id: !input light_switch
+      - conditions:
+          - condition: trigger
+            id: no_motion
+        sequence:
+          - service: homeassistant.turn_off
+            target:
+              device_id: !input light_switch
+
+mode: restart
