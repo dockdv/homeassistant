@@ -1,0 +1,77 @@
+blueprint:
+  name: Zigbee Pair
+  description: >
+    Power-cycles a smart plug to trigger IKEA/TRÅDFRI bulb pairing/reset mode.
+    This automation is intentionally NOT triggerable by sensors/events (dummy trigger).
+    Use the Automation "Run" button (or call automation.trigger) to execute it.
+  domain: automation
+
+  input:
+    smart_plug:
+      name: Smart plug
+      selector:
+        entity:
+          domain: switch
+
+    cycles:
+      name: Number of cycles (OFF→ON)
+      default: 6
+      selector:
+        number:
+          min: 1
+          max: 12
+          step: 1
+          mode: box
+
+    off_time:
+      name: OFF duration (per cycle)
+      default:
+        seconds: 1
+      selector:
+        duration:
+          enable_millisecond: true
+
+    on_time:
+      name: ON duration (per cycle)
+      default:
+        seconds: 1
+      selector:
+        duration:
+          enable_millisecond: true
+
+    initial_on_time:
+      name: Initial ON time (before cycling)
+      default:
+        seconds: 1
+      selector:
+        duration:
+          enable_millisecond: true
+
+mode: single
+max_exceeded: silent
+
+trigger:
+  - platform: event
+    event_type: __never_fire__
+
+action:
+  - service: switch.turn_on
+    target:
+      entity_id: !input smart_plug
+  - delay: !input initial_on_time
+
+  - repeat:
+      count: !input cycles
+      sequence:
+        - service: switch.turn_off
+          target:
+            entity_id: !input smart_plug
+        - delay: !input off_time
+        - service: switch.turn_on
+          target:
+            entity_id: !input smart_plug
+        - delay: !input on_time
+
+  - service: switch.turn_on
+    target:
+      entity_id: !input smart_plug
