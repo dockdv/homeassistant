@@ -92,6 +92,7 @@ variables:
   high: !input high_threshold
   low: !input low_threshold
   mode: !input trigger_mode
+  interval: !input trigger_interval
 
 trigger:
   - platform: state
@@ -99,12 +100,19 @@ trigger:
     id: value_change
 
   - platform: time_pattern
-    seconds: !input trigger_interval
+    seconds: "/1"
     id: periodic
 
 condition:
   - condition: template
-    value_template: "{{ trigger.id == mode }}"
+    value_template: >
+      {% if trigger.id == 'value_change' %}
+        {{ mode == 'value_change' }}
+      {% else %}
+        {{ mode == 'periodic' and
+           (state_attr(this.entity_id, 'last_triggered') is none or
+            (now() - state_attr(this.entity_id, 'last_triggered')).total_seconds() >= interval) }}
+      {% endif %}
 
 action:
   - variables:
