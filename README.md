@@ -1,6 +1,6 @@
 # Home Assistant Blueprints
 
-A collection of Home Assistant automation blueprints for Zigbee remotes, smart plugs, IR blasters, and motion sensors.
+A collection of Home Assistant automation blueprints for Zigbee remotes, smart plugs, IR blasters, motion sensors, and air quality monitors.
 
 ## Blueprints
 
@@ -19,3 +19,7 @@ This blueprint maps up to four button actions from a MOES/Tuya TS004F Zigbee rem
 ### Motion Sensor Auto Light Off
 
 This blueprint turns a light or switch on when a motion or occupancy sensor detects activity, then automatically turns it off after a configurable period of no motion. It supports both `motion` and `occupancy` device classes and can target either `light` or `switch` entities. The automation runs in restart mode, so any new motion resets the off timer.
+
+### Sonoff CO2 Meter
+
+This blueprint monitors a Sonoff CO2 sensor and triggers different actions based on three configurable zones. When CO2 rises above a high threshold (default 1000 ppm), it runs one action such as turning on ventilation or a warning light. When CO2 drops below a low threshold (default 600 ppm), it runs a second action. When CO2 returns to the normal range between the two thresholds, it runs a third recovery action, allowing you to automate the full cycle of air quality response.
