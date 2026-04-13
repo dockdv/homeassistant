@@ -1,7 +1,7 @@
 blueprint:
-  name: Sonoff CO2 Meter
+  name: SwitchBot CO2 Meter
   description: >
-    Monitors a Sonoff CO2 sensor and triggers actions based on three zones:
+    Monitors a SwitchBot CO2 sensor and triggers actions based on three zones:
     above a high threshold, below a low threshold, or within the range
     between the two thresholds.
   domain: automation
@@ -9,7 +9,7 @@ blueprint:
   input:
     co2_sensor:
       name: CO2 sensor
-      description: The Sonoff CO2 sensor entity that reports ppm.
+      description: The SwitchBot CO2 sensor entity that reports ppm.
       selector:
         entity:
           domain: sensor

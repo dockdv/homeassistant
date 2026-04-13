@@ -20,6 +20,6 @@ This blueprint maps up to four button actions from a MOES/Tuya TS004F Zigbee rem
 
 This blueprint turns a light or switch on when a motion or occupancy sensor detects activity, then automatically turns it off after a configurable period of no motion. It supports both `motion` and `occupancy` device classes and can target either `light` or `switch` entities. The automation runs in restart mode, so any new motion resets the off timer.
 
-### Sonoff CO2 Meter
+### SwitchBot CO2 Meter
 
-This blueprint monitors a Sonoff CO2 sensor and triggers different actions based on three air quality zones. When CO2 rises above a high threshold (default 1000 ppm), air quality is poor and it runs one action such as turning on ventilation or a warning light. When CO2 drops below a low threshold (default 1400 ppm), air quality is good and it runs a second action. When CO2 is between the two thresholds, air quality is acceptable and it runs a third action, allowing you to automate the full cycle of air quality response.
+This blueprint monitors a SwitchBot CO2 sensor and triggers different actions based on three air quality zones. When CO2 rises above a high threshold (default 1000 ppm), air quality is poor and it runs one action such as turning on ventilation or a warning light. When CO2 drops below a low threshold (default 1400 ppm), air quality is good and it runs a second action. When CO2 is between the two thresholds, air quality is acceptable and it runs a third action, allowing you to automate the full cycle of air quality response.
