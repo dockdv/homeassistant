@@ -1,6 +1,6 @@
 # Home Assistant Blueprints
 
-A collection of Home Assistant automation blueprints for Zigbee remotes, smart plugs, IR blasters, motion sensors, and air quality monitors.
+A collection of Home Assistant automation blueprints.
 
 ## Blueprints
 

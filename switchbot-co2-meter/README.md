@@ -8,10 +8,16 @@ This blueprint divides CO2 readings into three zones and runs a different action
 
 | Zone | Condition | Air quality |
 | ---- | --------- | ----------- |
-| **Above high** | CO2 > high threshold (default 1000 ppm) | Poor |
+| **Above high** | CO2 > high threshold (default 1400 ppm) | Poor |
 | **Within range** | Low threshold ≤ CO2 ≤ high threshold | Acceptable |
-| **Below low** | CO2 < low threshold (default 1400 ppm) | Good |
+| **Below low** | CO2 < low threshold (default 1000 ppm) | Good |
 
+### Trigger modes
+
+| Mode | Behaviour |
+| ---- | --------- |
+| **value_change** (default) | Evaluates the zone whenever the sensor reports a new value |
+| **periodic** | Evaluates the zone at a fixed interval (default 30 seconds) regardless of sensor updates |
 
 ---
 
@@ -28,6 +34,7 @@ This blueprint divides CO2 readings into three zones and runs a different action
 ---
 
 ## Customisation
+* **Choose your trigger mode** — use "value_change" for immediate response or "periodic" to check at a fixed interval (configurable from 5 to 3600 seconds).
 * **Adjust thresholds** to match your environment.
 * **Stack multiple actions** in each zone — e.g. turn on a fan *and* send a mobile notification when CO2 is high.
 * **Use with any CO2 sensor** — not limited to SwitchBot; any sensor reporting `device_class: carbon_dioxide` will work.
