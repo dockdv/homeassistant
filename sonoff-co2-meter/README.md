@@ -12,7 +12,6 @@ This blueprint divides CO2 readings into three zones and runs a different action
 | **Within range** | Low threshold ≤ CO2 ≤ high threshold | Acceptable |
 | **Below low** | CO2 < low threshold (default 1400 ppm) | Good |
 
-The high threshold is configurable between 1000 and 5000 ppm, and the low threshold between 400 and 5000 ppm, both in steps of 50.
 
 ---
 
@@ -29,7 +28,7 @@ The high threshold is configurable between 1000 and 5000 ppm, and the low thresh
 ---
 
 ## Customisation
-* **Adjust thresholds** to match your environment — offices typically aim for < 800 ppm, bedrooms < 1000 ppm.
+* **Adjust thresholds** to match your environment.
 * **Stack multiple actions** in each zone — e.g. turn on a fan *and* send a mobile notification when CO2 is high.
 * **Use with any CO2 sensor** — not limited to Sonoff; any sensor reporting `device_class: carbon_dioxide` will work.
 * **Add hysteresis manually** by setting the high and low thresholds further apart to avoid rapid toggling near a boundary.
