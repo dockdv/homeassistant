@@ -1,0 +1,115 @@
+blueprint:
+  name: Fan Control (Off / 1 / 2 / 3)
+  description: >
+    Map up to four actions from a MOES/Tuya Zigbee remote (TS004F)
+    to four arbitrary base-64 IR strings.  Works out-of-the-box for
+    Westinghouse ceiling-fan receivers but is fully re-mappable.
+
+  domain: automation
+
+  input:
+    remote_device:
+      name: Remote (TS004F)
+      description: The Zigbee device that produces the MQTT `action` events.
+      selector:
+        device:
+          integration: mqtt            # change if you use ZHA
+
+    text_entity:
+      name: IR command text entity
+      description: The *text* entity your IR blaster watches and auto-sends.
+      selector:
+        entity:
+          domain: text
+
+    # ─────────────── Pair #1 ───────────────
+    pair1_subtype:
+      name: Remote action #1
+      description: Paste the `subtype` string for the first button/action.
+      default: "1_single"
+      selector:
+        text:
+    pair1_code:
+      name: IR code #1
+      description: Base-64 IR payload to send for action #1.
+      default: "A/MEpwFAAwPcAfME4AcDBfMEpwGnAUAFwAMBJSDACQGnAcAJ4AEHEfMEpwGnAfMEpwHzBKcB8wTcAQ=="
+      selector:
+        text:
+
+    # ─────────────── Pair #2 ───────────────
+    pair2_subtype:
+      name: Remote action #2
+      default: "2_single"
+      selector: {text: {}}
+    pair2_code:
+      name: IR code #2
+      default: "A/cElAFAAwPCAfcE4BMDAJQgHwX3BMsc9wRACQGUAcArAZQB4AEDwBPABwH3BOAJL8AbwAdAP8ALAfcE4AUv4AMbQCNAD+ACAwIE9wQ="
+      selector: {text: {}}
+
+    # ─────────────── Pair #3 ───────────────
+    pair3_subtype:
+      name: Remote action #3
+      default: "3_single"
+      selector: {text: {}}
+    pair3_code:
+      name: IR code #3
+      default: "A/QElQFAAwPCAfQEwAMAleACC0ATA/QElQFABwfCAR0g9ASVAUADA8IB9ATgDwMB9ASAHwGVAeARLwGVAeABAwP0BJUBQEsBlQFAL4AJQAXgCwMNlQH0BPQEwgGVAfQElQE="
+      selector: {text: {}}
+
+    # ─────────────── Pair #4 ───────────────
+    pair4_subtype:
+      name: Remote action #4
+      default: "4_single"
+      selector: {text: {}}
+    pair4_code:
+      name: IR code #4
+      default: "A/cElAFAAwPBAfcEwAMB9wTgBQ9AFwL3BJQgIQPRHPcEQAcBlAFAE8ADAfcE4AUPBZQB9wT3BEAF4AUvQBFAMwP3BJQBQAfgAwMF9wSUAfcE4AUvwB8D9wSUAcALwAcF9wSUAfcE"
+      selector: {text: {}}
+
+mode: single
+
+# ─────────────── Variables ───────────────
+variables:
+  ir_codes:
+    p1: !input pair1_code
+    p2: !input pair2_code
+    p3: !input pair3_code
+    p4: !input pair4_code
+
+# ─────────────── Triggers ───────────────
+trigger:
+  - platform: device
+    device_id: !input remote_device
+    domain: mqtt
+    type: action
+    subtype: !input pair1_subtype
+    id: p1
+
+  - platform: device
+    device_id: !input remote_device
+    domain: mqtt
+    type: action
+    subtype: !input pair2_subtype
+    id: p2
+
+  - platform: device
+    device_id: !input remote_device
+    domain: mqtt
+    type: action
+    subtype: !input pair3_subtype
+    id: p3
+
+  - platform: device
+    device_id: !input remote_device
+    domain: mqtt
+    type: action
+    subtype: !input pair4_subtype
+    id: p4
+
+# ─────────────── Action ───────────────
+action:
+  - service: text.set_value
+    target:
+      entity_id: !input text_entity
+    data:
+      value: "{{ ir_codes[trigger.id] }}"

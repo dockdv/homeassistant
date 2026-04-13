@@ -1,0 +1,141 @@
+blueprint:
+  name: LoraTap/Tuya TS0043 3-Button Remote
+  description: Fully custom button mappings for TS0043 via Zigbee2MQTT MQTT device triggers.
+  domain: automation
+
+  input:
+    remote:
+      name: Remote device (Zigbee2MQTT)
+      selector:
+        device:
+          integration: mqtt
+
+    b1_single:
+      name: Button 1 - single
+      default: []
+      selector: { action: {} }
+    b1_double:
+      name: Button 1 - double
+      default: []
+      selector: { action: {} }
+    b1_hold:
+      name: Button 1 - hold
+      default: []
+      selector: { action: {} }
+
+    b2_single:
+      name: Button 2 - single
+      default: []
+      selector: { action: {} }
+    b2_double:
+      name: Button 2 - double
+      default: []
+      selector: { action: {} }
+    b2_hold:
+      name: Button 2 - hold
+      default: []
+      selector: { action: {} }
+
+    b3_single:
+      name: Button 3 - single
+      default: []
+      selector: { action: {} }
+    b3_double:
+      name: Button 3 - double
+      default: []
+      selector: { action: {} }
+    b3_hold:
+      name: Button 3 - hold
+      default: []
+      selector: { action: {} }
+
+mode: queued
+max: 20
+max_exceeded: silent
+
+trigger:
+  - platform: device
+    domain: mqtt
+    device_id: !input remote
+    type: action
+    subtype: 1_single
+    id: b1_single
+
+  - platform: device
+    domain: mqtt
+    device_id: !input remote
+    type: action
+    subtype: 1_double
+    id: b1_double
+
+  - platform: device
+    domain: mqtt
+    device_id: !input remote
+    type: action
+    subtype: 1_hold
+    id: b1_hold
+
+  - platform: device
+    domain: mqtt
+    device_id: !input remote
+    type: action
+    subtype: 2_single
+    id: b2_single
+
+  - platform: device
+    domain: mqtt
+    device_id: !input remote
+    type: action
+    subtype: 2_double
+    id: b2_double
+
+  - platform: device
+    domain: mqtt
+    device_id: !input remote
+    type: action
+    subtype: 2_hold
+    id: b2_hold
+
+  - platform: device
+    domain: mqtt
+    device_id: !input remote
+    type: action
+    subtype: 3_single
+    id: b3_single
+
+  - platform: device
+    domain: mqtt
+    device_id: !input remote
+    type: action
+    subtype: 3_double
+    id: b3_double
+
+  - platform: device
+    domain: mqtt
+    device_id: !input remote
+    type: action
+    subtype: 3_hold
+    id: b3_hold
+
+action:
+  - choose:
+      - conditions: "{{ trigger.id == 'b1_single' }}"
+        sequence: !input b1_single
+      - conditions: "{{ trigger.id == 'b1_double' }}"
+        sequence: !input b1_double
+      - conditions: "{{ trigger.id == 'b1_hold' }}"
+        sequence: !input b1_hold
+
+      - conditions: "{{ trigger.id == 'b2_single' }}"
+        sequence: !input b2_single
+      - conditions: "{{ trigger.id == 'b2_double' }}"
+        sequence: !input b2_double
+      - conditions: "{{ trigger.id == 'b2_hold' }}"
+        sequence: !input b2_hold
+
+      - conditions: "{{ trigger.id == 'b3_single' }}"
+        sequence: !input b3_single
+      - conditions: "{{ trigger.id == 'b3_double' }}"
+        sequence: !input b3_double
+      - conditions: "{{ trigger.id == 'b3_hold' }}"
+        sequence: !input b3_hold
