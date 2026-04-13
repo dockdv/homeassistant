@@ -17,7 +17,6 @@ Both thresholds are configurable between 400 and 5000 ppm in steps of 50.
 ---
 
 ## Prerequisites
-* **Home Assistant 2023.6 or newer** (blueprint format)
 * A **Sonoff CO2 sensor** (or any sensor with `device_class: carbon_dioxide`) integrated into Home Assistant
 * Entities you want to control (lights, switches, fans, notification services, etc.)
 
