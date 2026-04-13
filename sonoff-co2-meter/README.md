@@ -6,11 +6,11 @@
 ## What it does
 This blueprint divides CO2 readings into three zones and runs a different action for each:
 
-| Zone | Condition | Air quality | Example use |
-| ---- | --------- | ----------- | ----------- |
-| **Above high** | CO2 > high threshold (default 1000 ppm) | Poor | Turn on ventilation or warning light |
-| **Within range** | Low threshold ≤ CO2 ≤ high threshold | Acceptable | Reduce ventilation or send advisory notification |
-| **Below low** | CO2 < low threshold (default 1400 ppm) | Good | Turn off ventilation or send "all clear" notification |
+| Zone | Condition | Air quality |
+| ---- | --------- | ----------- |
+| **Above high** | CO2 > high threshold (default 1000 ppm) | Poor |
+| **Within range** | Low threshold ≤ CO2 ≤ high threshold | Acceptable |
+| **Below low** | CO2 < low threshold (default 1400 ppm) | Good |
 
 The high threshold is configurable between 1000 and 5000 ppm, and the low threshold between 400 and 5000 ppm, both in steps of 50.
 
