@@ -18,7 +18,7 @@ blueprint:
     high_threshold:
       name: High threshold (ppm)
       description: CO2 level above which the "above high" action is triggered.
-      default: 1000
+      default: 1400
       selector:
         number:
           min: 400
@@ -30,7 +30,7 @@ blueprint:
     low_threshold:
       name: Low threshold (ppm)
       description: CO2 level below which the "below low" action is triggered.
-      default: 1400
+      default: 1000
       selector:
         number:
           min: 400
