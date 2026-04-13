@@ -3,7 +3,8 @@ blueprint:
   description: >
     Monitors a SwitchBot CO2 sensor and triggers actions based on three zones:
     above a high threshold, below a low threshold, or within the range
-    between the two thresholds.
+    between the two thresholds. Can trigger on every sensor value change
+    or on a periodic interval.
   domain: automation
 
   input:
@@ -14,6 +15,30 @@ blueprint:
         entity:
           domain: sensor
           device_class: carbon_dioxide
+
+    trigger_mode:
+      name: Trigger mode
+      description: >
+        "value_change" triggers whenever the sensor reports a new value.
+        "periodic" triggers at a fixed interval regardless of value changes.
+      default: value_change
+      selector:
+        select:
+          options:
+            - value_change
+            - periodic
+
+    trigger_interval:
+      name: Trigger interval (seconds)
+      description: How often to check the CO2 level when trigger mode is "periodic".
+      default: 30
+      selector:
+        number:
+          min: 5
+          max: 3600
+          step: 5
+          unit_of_measurement: seconds
+          mode: box
 
     high_threshold:
       name: High threshold (ppm)
@@ -55,37 +80,41 @@ blueprint:
 
     action_within_range:
       name: Action when within range (Acceptable)
-      description: Runs when CO2 returns to between the low and high thresholds.
+      description: Runs when CO2 is between the low and high thresholds.
       default: []
       selector:
         action: {}
 
 mode: single
 
+variables:
+  sensor_entity: !input co2_sensor
+  high: !input high_threshold
+  low: !input low_threshold
+  mode: !input trigger_mode
+
 trigger:
-  - platform: numeric_state
+  - platform: state
     entity_id: !input co2_sensor
-    above: !input high_threshold
-    id: above_high
+    id: value_change
 
-  - platform: numeric_state
-    entity_id: !input co2_sensor
-    below: !input low_threshold
-    id: below_low
+  - platform: time_pattern
+    seconds: !input trigger_interval
+    id: periodic
 
-  - platform: numeric_state
-    entity_id: !input co2_sensor
-    above: !input low_threshold
-    below: !input high_threshold
-    id: within_range
+condition:
+  - condition: template
+    value_template: "{{ trigger.id == mode }}"
 
 action:
+  - variables:
+      co2: "{{ states(sensor_entity) | float(0) }}"
   - choose:
-      - conditions: "{{ trigger.id == 'above_high' }}"
+      - conditions: "{{ co2 > high }}"
         sequence: !input action_above_high
 
-      - conditions: "{{ trigger.id == 'below_low' }}"
+      - conditions: "{{ co2 < low }}"
         sequence: !input action_below_low
 
-      - conditions: "{{ trigger.id == 'within_range' }}"
+      - conditions: "{{ co2 >= low and co2 <= high }}"
         sequence: !input action_within_range
