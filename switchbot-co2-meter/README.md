@@ -17,7 +17,7 @@ This blueprint divides CO2 readings into three zones and runs a different action
 | Mode | Behaviour |
 | ---- | --------- |
 | **value_change** (default) | Evaluates the zone whenever the sensor reports a new value |
-| **periodic** | Evaluates the zone at a fixed interval (default 30 seconds) regardless of sensor updates |
+| **periodic** | Evaluates the zone at a fixed interval (default 30 seconds, configurable from 5 to 3600 seconds) regardless of sensor updates |
 
 ---
 
