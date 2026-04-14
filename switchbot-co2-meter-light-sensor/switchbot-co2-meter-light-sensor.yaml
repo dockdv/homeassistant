@@ -1,10 +1,10 @@
 blueprint:
-  name: SwitchBot CO2 Meter with Light Sensor
+  name: SwitchBot CO2 Meter Indicator Light
   description: >
-    Monitors a SwitchBot CO2 sensor and triggers actions based on three zones
-    (above high, below low, within range). A separate light sensor determines
-    which set of actions runs, letting you respond differently when the room
-    is bright vs. dim.
+    Drives a single light to indicate CO2 level. The light colour reflects
+    the CO2 zone (red = poor, amber = acceptable, green = good). A light
+    sensor chooses between two brightness levels so the indicator is
+    bright in daylight and dim at night.
   domain: automation
 
   input:
@@ -16,19 +16,26 @@ blueprint:
           domain: sensor
           device_class: carbon_dioxide
 
+    target_light:
+      name: Indicator light
+      description: The light to drive. Must support RGB colour.
+      selector:
+        entity:
+          domain: light
+
     light_sensor:
-      name: Light sensor
-      description: Illuminance sensor used to decide which action set to run.
+      name: Ambient light sensor
+      description: Illuminance sensor used to pick the brightness level.
       selector:
         entity:
           domain: sensor
           device_class: illuminance
 
     light_threshold:
-      name: Light threshold (lux)
+      name: Ambient light threshold (lux)
       description: >
-        When the light sensor value is at or above this threshold, the
-        "bright" actions run. When below, the "dim" actions run.
+        At or above this value the "bright" brightness is used.
+        Below it, the "dim" brightness is used.
       default: 50
       selector:
         number:
@@ -37,6 +44,28 @@ blueprint:
           step: 1
           unit_of_measurement: lx
           mode: box
+
+    brightness_bright:
+      name: Brightness when bright (%)
+      default: 100
+      selector:
+        number:
+          min: 1
+          max: 100
+          step: 1
+          unit_of_measurement: "%"
+          mode: slider
+
+    brightness_dim:
+      name: Brightness when dim (%)
+      default: 20
+      selector:
+        number:
+          min: 1
+          max: 100
+          step: 1
+          unit_of_measurement: "%"
+          mode: slider
 
     trigger_mode:
       name: Trigger mode
@@ -64,7 +93,7 @@ blueprint:
 
     high_threshold:
       name: High threshold (ppm)
-      description: CO2 level above which the "above high" action is triggered.
+      description: CO2 level above which the light turns red (Poor).
       default: 1400
       selector:
         number:
@@ -76,7 +105,7 @@ blueprint:
 
     low_threshold:
       name: Low threshold (ppm)
-      description: CO2 level below which the "below low" action is triggered.
+      description: CO2 level below which the light turns green (Good).
       default: 1000
       selector:
         number:
@@ -86,46 +115,14 @@ blueprint:
           unit_of_measurement: ppm
           mode: box
 
-    # ─────────────── Bright (light ≥ threshold) ───────────────
-    action_bright_above_high:
-      name: Bright - action when above high (Poor)
-      default: []
-      selector:
-        action: {}
-    action_bright_below_low:
-      name: Bright - action when below low (Good)
-      default: []
-      selector:
-        action: {}
-    action_bright_within_range:
-      name: Bright - action when within range (Acceptable)
-      default: []
-      selector:
-        action: {}
-
-    # ─────────────── Dim (light < threshold) ───────────────
-    action_dim_above_high:
-      name: Dim - action when above high (Poor)
-      default: []
-      selector:
-        action: {}
-    action_dim_below_low:
-      name: Dim - action when below low (Good)
-      default: []
-      selector:
-        action: {}
-    action_dim_within_range:
-      name: Dim - action when within range (Acceptable)
-      default: []
-      selector:
-        action: {}
-
 mode: single
 
 variables:
   sensor_entity: !input co2_sensor
   light_entity: !input light_sensor
   light_thr: !input light_threshold
+  bright_pct: !input brightness_bright
+  dim_pct: !input brightness_dim
   high: !input high_threshold
   low: !input low_threshold
   mode: !input trigger_mode
@@ -154,28 +151,21 @@ condition:
 action:
   - variables:
       co2: "{{ states(sensor_entity) | float(0) }}"
-      light: "{{ states(light_entity) | float(0) }}"
-      zone: >-
+      rgb: >-
         {%- set v = states(sensor_entity) | float(0) -%}
-        {%- if v > (high | float) -%}above_high
-        {%- elif v < (low | float) -%}below_low
-        {%- else -%}within_range
+        {%- if v > (high | float) -%}[255, 0, 0]
+        {%- elif v < (low | float) -%}[0, 255, 0]
+        {%- else -%}[255, 191, 0]
         {%- endif -%}
-      light_state: >-
-        {%- if (states(light_entity) | float(0)) >= (light_thr | float) -%}bright
-        {%- else -%}dim
+      brightness: >-
+        {%- if (states(light_entity) | float(0)) >= (light_thr | float) -%}
+        {{ bright_pct }}
+        {%- else -%}
+        {{ dim_pct }}
         {%- endif -%}
-  - choose:
-      - conditions: "{{ light_state == 'bright' and zone == 'above_high' }}"
-        sequence: !input action_bright_above_high
-      - conditions: "{{ light_state == 'bright' and zone == 'below_low' }}"
-        sequence: !input action_bright_below_low
-      - conditions: "{{ light_state == 'bright' and zone == 'within_range' }}"
-        sequence: !input action_bright_within_range
-
-      - conditions: "{{ light_state == 'dim' and zone == 'above_high' }}"
-        sequence: !input action_dim_above_high
-      - conditions: "{{ light_state == 'dim' and zone == 'below_low' }}"
-        sequence: !input action_dim_below_low
-      - conditions: "{{ light_state == 'dim' and zone == 'within_range' }}"
-        sequence: !input action_dim_within_range
+  - service: light.turn_on
+    target:
+      entity_id: !input target_light
+    data:
+      rgb_color: "{{ rgb }}"
+      brightness_pct: "{{ brightness | int }}"

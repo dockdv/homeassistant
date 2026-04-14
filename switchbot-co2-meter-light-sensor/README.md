@@ -1,41 +1,43 @@
-# SwitchBot CO2 Meter with Light Sensor Blueprint
-*A Home Assistant automation blueprint that triggers actions based on CO2 ppm levels, with a light sensor deciding which set of actions to run.*
+# SwitchBot CO2 Meter Indicator Light Blueprint
+*A Home Assistant automation blueprint that drives a single RGB light to visually indicate CO2 air quality, with brightness adjusted by ambient light.*
 
 ---
 
 ## What it does
-This blueprint divides CO2 readings into three zones and runs a different action for each:
+This blueprint turns one light into a CO2 quality indicator. The colour reflects the current CO2 zone, and the brightness switches between two levels based on an ambient light sensor.
 
-| Zone | Condition | Air quality |
-| ---- | --------- | ----------- |
-| **Above high** | CO2 > high threshold (default 1400 ppm) | Poor |
-| **Within range** | Low threshold ≤ CO2 ≤ high threshold | Acceptable |
-| **Below low** | CO2 < low threshold (default 1000 ppm) | Good |
+### Colours per zone
 
-### Light-based action sets
+| Zone | Condition | Colour |
+| ---- | --------- | ------ |
+| **Poor** | CO2 > high threshold (default 1400 ppm) | 🔴 Red |
+| **Acceptable** | Low threshold ≤ CO2 ≤ high threshold | 🟡 Amber |
+| **Good** | CO2 < low threshold (default 1000 ppm) | 🟢 Green |
 
-Instead of using fixed time-of-day periods, this blueprint uses an **illuminance sensor** to pick between two action sets:
+Colours are hardcoded in the blueprint.
 
-| Light state | Condition | Typical scenario |
-| ----------- | --------- | ---------------- |
-| **Bright** | Light ≥ threshold (default 50 lx) | Daytime or lights on |
-| **Dim** | Light < threshold | Nighttime or lights off |
+### Brightness
 
-Each light state has its own three zone actions, giving six action selectors in total. For example, during the day you might turn on a fan and send a notification when CO2 is high; at night you might only turn on the fan silently.
+An ambient light sensor decides which brightness level is applied:
+
+| Ambient state | Condition | Brightness |
+| ------------- | --------- | ---------- |
+| **Bright** | Light ≥ threshold (default 50 lx) | Configurable (default 100%) |
+| **Dim** | Light < threshold | Configurable (default 20%) |
 
 ### Trigger modes
 
 | Mode | Behaviour |
 | ---- | --------- |
-| **value_change** (default) | Evaluates the zone whenever the CO2 sensor reports a new value |
-| **periodic** | Evaluates the zone at a fixed interval (default 30 seconds, configurable from 5 to 3600 seconds) regardless of sensor updates |
+| **value_change** (default) | Updates the light whenever the CO2 sensor reports a new value |
+| **periodic** | Updates the light at a fixed interval (default 30 seconds, configurable from 5 to 3600 seconds) |
 
 ---
 
 ## Prerequisites
-* A **SwitchBot CO2 sensor** (or any sensor with `device_class: carbon_dioxide`) integrated into Home Assistant
+* A **SwitchBot CO2 sensor** (or any sensor with `device_class: carbon_dioxide`)
 * An **illuminance sensor** (any sensor with `device_class: illuminance`)
-* Entities you want to control (lights, switches, fans, notification services, etc.)
+* An **RGB-capable light** entity
 
 ---
 
@@ -46,11 +48,10 @@ Each light state has its own three zone actions, giving six action selectors in 
 ---
 
 ## Customisation
-* **Choose your trigger mode** — use "value_change" for immediate response or "periodic" to check at a fixed interval (configurable from 5 to 3600 seconds).
-* **Tune the light threshold** to match your sensor and room — typical indoor ambient levels range from ~1 lx (dark) to ~500 lx (well-lit).
+* **Choose your trigger mode** — use "value_change" for immediate response or "periodic" for fixed-interval updates.
+* **Tune the light threshold** — typical indoor levels range from ~1 lx (dark) to ~500 lx (well-lit).
+* **Set the two brightness levels** (bright / dim) to suit your room.
 * **Adjust CO2 thresholds** to match your environment.
-* **Stack multiple actions** in each slot — e.g. turn on a fan *and* send a mobile notification when CO2 is high and the room is bright.
-* **Use with any sensors** — not limited to SwitchBot; any CO2 sensor with `device_class: carbon_dioxide` and any illuminance sensor will work.
 
 ---
 
