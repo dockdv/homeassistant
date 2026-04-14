@@ -1,5 +1,5 @@
 blueprint:
-  name: SwitchBot CO2 Meter
+  name: SwitchBot CO2 Meter with Periods
   description: >
     Monitors a SwitchBot CO2 sensor and triggers actions based on three zones
     (above high, below low, within range) with up to 4 time-of-day periods.
