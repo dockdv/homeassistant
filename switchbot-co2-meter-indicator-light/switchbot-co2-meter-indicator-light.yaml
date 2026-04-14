@@ -1,10 +1,9 @@
 blueprint:
   name: SwitchBot CO2 Meter Indicator Light
   description: >
-    Drives a single light to indicate CO2 level. The light colour reflects
-    the CO2 zone (red = poor, amber = acceptable, green = good). A light
-    sensor chooses between two brightness levels so the indicator is
-    bright in daylight and dim at night.
+    Drives a single RGB light to indicate CO2 level. The light colour reflects
+    the CO2 zone: red = poor, amber = acceptable, green = good. Colours are
+    hardcoded in the blueprint.
   domain: automation
 
   input:
@@ -22,50 +21,6 @@ blueprint:
       selector:
         entity:
           domain: light
-
-    light_sensor:
-      name: Ambient light sensor
-      description: Illuminance sensor used to pick the brightness level.
-      selector:
-        entity:
-          domain: sensor
-          device_class: illuminance
-
-    light_threshold:
-      name: Ambient light threshold (lux)
-      description: >
-        At or above this value the "bright" brightness is used.
-        Below it, the "dim" brightness is used.
-      default: 50
-      selector:
-        number:
-          min: 0
-          max: 10000
-          step: 1
-          unit_of_measurement: lx
-          mode: box
-
-    brightness_bright:
-      name: Brightness when bright (%)
-      default: 100
-      selector:
-        number:
-          min: 1
-          max: 100
-          step: 1
-          unit_of_measurement: "%"
-          mode: slider
-
-    brightness_dim:
-      name: Brightness when dim (%)
-      default: 20
-      selector:
-        number:
-          min: 1
-          max: 100
-          step: 1
-          unit_of_measurement: "%"
-          mode: slider
 
     trigger_mode:
       name: Trigger mode
@@ -119,10 +74,6 @@ mode: single
 
 variables:
   sensor_entity: !input co2_sensor
-  light_entity: !input light_sensor
-  light_thr: !input light_threshold
-  bright_pct: !input brightness_bright
-  dim_pct: !input brightness_dim
   high: !input high_threshold
   low: !input low_threshold
   mode: !input trigger_mode
@@ -150,22 +101,14 @@ condition:
 
 action:
   - variables:
-      co2: "{{ states(sensor_entity) | float(0) }}"
       rgb: >-
         {%- set v = states(sensor_entity) | float(0) -%}
         {%- if v > (high | float) -%}[255, 0, 0]
         {%- elif v < (low | float) -%}[0, 255, 0]
         {%- else -%}[255, 191, 0]
         {%- endif -%}
-      brightness: >-
-        {%- if (states(light_entity) | float(0)) >= (light_thr | float) -%}
-        {{ bright_pct }}
-        {%- else -%}
-        {{ dim_pct }}
-        {%- endif -%}
   - service: light.turn_on
     target:
       entity_id: !input target_light
     data:
       rgb_color: "{{ rgb }}"
-      brightness_pct: "{{ brightness | int }}"

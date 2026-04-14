@@ -26,7 +26,7 @@ This blueprint monitors a SwitchBot CO2 sensor and triggers different actions ba
 
 ### SwitchBot CO2 Meter Indicator Light
 
-A simpler, purpose-built variant that turns a single RGB light into a CO2 quality indicator. The light colour reflects the current zone (red for Poor, amber for Acceptable, green for Good — hardcoded), and an illuminance sensor picks between two configurable brightness levels so the indicator is visible during the day but dim at night.
+A simpler, purpose-built variant that turns a single RGB light into a CO2 quality indicator. The light colour reflects the current zone (red for Poor, amber for Acceptable, green for Good — hardcoded). Pair with the Sensor-Controlled Light blueprint below if you also want brightness to track ambient light.
 
 ### Sensor-Controlled Light
 
