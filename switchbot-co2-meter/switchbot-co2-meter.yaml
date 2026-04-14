@@ -1,10 +1,10 @@
 blueprint:
   name: SwitchBot CO2 Meter
   description: >
-    Monitors a SwitchBot CO2 sensor and triggers actions based on three zones:
-    above a high threshold, below a low threshold, or within the range
-    between the two thresholds. Can trigger on every sensor value change
-    or on a periodic interval.
+    Monitors a SwitchBot CO2 sensor and triggers actions based on three zones
+    (above high, below low, within range) with up to 4 time-of-day periods.
+    Each enabled period has its own set of zone actions, letting you respond
+    differently in the morning, day, evening, and night.
   domain: automation
 
   input:
@@ -64,23 +64,110 @@ blueprint:
           unit_of_measurement: ppm
           mode: box
 
-    action_above_high:
-      name: Action when above high threshold (Poor)
-      description: Runs when CO2 rises above the high threshold (e.g. turn on ventilation).
+    # ─────────────── Period 1 ───────────────
+    period_1_enabled:
+      name: Period 1 - enabled
+      default: true
+      selector:
+        boolean: {}
+    period_1_start:
+      name: Period 1 - start time
+      default: "07:00:00"
+      selector:
+        time: {}
+    action_p1_above_high:
+      name: Period 1 - action when above high (Poor)
+      default: []
+      selector:
+        action: {}
+    action_p1_below_low:
+      name: Period 1 - action when below low (Good)
+      default: []
+      selector:
+        action: {}
+    action_p1_within_range:
+      name: Period 1 - action when within range (Acceptable)
       default: []
       selector:
         action: {}
 
-    action_below_low:
-      name: Action when below low threshold (Good)
-      description: Runs when CO2 drops below the low threshold.
+    # ─────────────── Period 2 ───────────────
+    period_2_enabled:
+      name: Period 2 - enabled
+      default: false
+      selector:
+        boolean: {}
+    period_2_start:
+      name: Period 2 - start time
+      default: "12:00:00"
+      selector:
+        time: {}
+    action_p2_above_high:
+      name: Period 2 - action when above high (Poor)
+      default: []
+      selector:
+        action: {}
+    action_p2_below_low:
+      name: Period 2 - action when below low (Good)
+      default: []
+      selector:
+        action: {}
+    action_p2_within_range:
+      name: Period 2 - action when within range (Acceptable)
       default: []
       selector:
         action: {}
 
-    action_within_range:
-      name: Action when within range (Acceptable)
-      description: Runs when CO2 is between the low and high thresholds.
+    # ─────────────── Period 3 ───────────────
+    period_3_enabled:
+      name: Period 3 - enabled
+      default: false
+      selector:
+        boolean: {}
+    period_3_start:
+      name: Period 3 - start time
+      default: "18:00:00"
+      selector:
+        time: {}
+    action_p3_above_high:
+      name: Period 3 - action when above high (Poor)
+      default: []
+      selector:
+        action: {}
+    action_p3_below_low:
+      name: Period 3 - action when below low (Good)
+      default: []
+      selector:
+        action: {}
+    action_p3_within_range:
+      name: Period 3 - action when within range (Acceptable)
+      default: []
+      selector:
+        action: {}
+
+    # ─────────────── Period 4 ───────────────
+    period_4_enabled:
+      name: Period 4 - enabled
+      default: false
+      selector:
+        boolean: {}
+    period_4_start:
+      name: Period 4 - start time
+      default: "22:00:00"
+      selector:
+        time: {}
+    action_p4_above_high:
+      name: Period 4 - action when above high (Poor)
+      default: []
+      selector:
+        action: {}
+    action_p4_below_low:
+      name: Period 4 - action when below low (Good)
+      default: []
+      selector:
+        action: {}
+    action_p4_within_range:
+      name: Period 4 - action when within range (Acceptable)
       default: []
       selector:
         action: {}
@@ -93,6 +180,14 @@ variables:
   low: !input low_threshold
   mode: !input trigger_mode
   interval: !input trigger_interval
+  p1_enabled: !input period_1_enabled
+  p1_start: !input period_1_start
+  p2_enabled: !input period_2_enabled
+  p2_start: !input period_2_start
+  p3_enabled: !input period_3_enabled
+  p3_start: !input period_3_start
+  p4_enabled: !input period_4_enabled
+  p4_start: !input period_4_start
 
 trigger:
   - platform: state
@@ -117,12 +212,61 @@ condition:
 action:
   - variables:
       co2: "{{ states(sensor_entity) | float(0) }}"
+      zone: >-
+        {% set v = states(sensor_entity) | float(0) %}
+        {%- if v > (high | float) -%}above_high
+        {%- elif v < (low | float) -%}below_low
+        {%- else -%}within_range
+        {%- endif -%}
+      active_period: >-
+        {%- set now_sec = now().hour * 3600 + now().minute * 60 + now().second -%}
+        {%- set ns = namespace(best_id=0, best_start=-1, any_id=0, any_start=-1) -%}
+        {%- set periods = [
+          (p1_enabled, p1_start, 1),
+          (p2_enabled, p2_start, 2),
+          (p3_enabled, p3_start, 3),
+          (p4_enabled, p4_start, 4)
+        ] -%}
+        {%- for enabled, start_str, pid in periods -%}
+          {%- if enabled -%}
+            {%- set parts = (start_str | string).split(':') -%}
+            {%- set sec = parts[0]|int * 3600 + parts[1]|int * 60 + (parts[2]|int if parts|length > 2 else 0) -%}
+            {%- if sec <= now_sec and sec > ns.best_start -%}
+              {%- set ns.best_start = sec -%}
+              {%- set ns.best_id = pid -%}
+            {%- endif -%}
+            {%- if sec > ns.any_start -%}
+              {%- set ns.any_start = sec -%}
+              {%- set ns.any_id = pid -%}
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+        {{ ns.best_id if ns.best_id > 0 else ns.any_id }}
   - choose:
-      - conditions: "{{ co2 > high }}"
-        sequence: !input action_above_high
+      - conditions: "{{ active_period | int == 1 and zone == 'above_high' }}"
+        sequence: !input action_p1_above_high
+      - conditions: "{{ active_period | int == 1 and zone == 'below_low' }}"
+        sequence: !input action_p1_below_low
+      - conditions: "{{ active_period | int == 1 and zone == 'within_range' }}"
+        sequence: !input action_p1_within_range
 
-      - conditions: "{{ co2 < low }}"
-        sequence: !input action_below_low
+      - conditions: "{{ active_period | int == 2 and zone == 'above_high' }}"
+        sequence: !input action_p2_above_high
+      - conditions: "{{ active_period | int == 2 and zone == 'below_low' }}"
+        sequence: !input action_p2_below_low
+      - conditions: "{{ active_period | int == 2 and zone == 'within_range' }}"
+        sequence: !input action_p2_within_range
 
-      - conditions: "{{ co2 >= low and co2 <= high }}"
-        sequence: !input action_within_range
+      - conditions: "{{ active_period | int == 3 and zone == 'above_high' }}"
+        sequence: !input action_p3_above_high
+      - conditions: "{{ active_period | int == 3 and zone == 'below_low' }}"
+        sequence: !input action_p3_below_low
+      - conditions: "{{ active_period | int == 3 and zone == 'within_range' }}"
+        sequence: !input action_p3_within_range
+
+      - conditions: "{{ active_period | int == 4 and zone == 'above_high' }}"
+        sequence: !input action_p4_above_high
+      - conditions: "{{ active_period | int == 4 and zone == 'below_low' }}"
+        sequence: !input action_p4_below_low
+      - conditions: "{{ active_period | int == 4 and zone == 'within_range' }}"
+        sequence: !input action_p4_within_range

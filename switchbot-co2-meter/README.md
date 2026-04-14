@@ -19,6 +19,21 @@ This blueprint divides CO2 readings into three zones and runs a different action
 | **value_change** (default) | Evaluates the zone whenever the sensor reports a new value |
 | **periodic** | Evaluates the zone at a fixed interval (default 30 seconds, configurable from 5 to 3600 seconds) regardless of sensor updates |
 
+### Time-of-day periods
+
+The blueprint supports up to **4 time periods**, each with its own set of zone actions. This lets you respond differently at different times of day — for example, send a notification during the day but stay silent at night.
+
+Each period has:
+* An **enable toggle** (only enabled periods are considered)
+* A **start time** (when the period begins)
+* Three **zone actions** (Poor, Acceptable, Good)
+
+The currently active period is whichever enabled period has the most recent start time, including wrap-around across midnight. For example, with only Period 1 (07:00) and Period 4 (22:00) enabled, Period 4 is active from 22:00 through 06:59 (next day), and Period 1 is active from 07:00 through 21:59.
+
+Edge cases:
+* **1 enabled period** — that period covers all 24 hours
+* **0 enabled periods** — nothing runs
+
 ---
 
 ## Prerequisites
@@ -35,6 +50,7 @@ This blueprint divides CO2 readings into three zones and runs a different action
 
 ## Customisation
 * **Choose your trigger mode** — use "value_change" for immediate response or "periodic" to check at a fixed interval (configurable from 5 to 3600 seconds).
+* **Enable multiple periods** to vary behaviour across the day (e.g. quieter actions at night).
 * **Adjust thresholds** to match your environment.
 * **Stack multiple actions** in each zone — e.g. turn on a fan *and* send a mobile notification when CO2 is high.
 * **Use with any CO2 sensor** — not limited to SwitchBot; any sensor reporting `device_class: carbon_dioxide` will work.
