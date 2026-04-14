@@ -22,4 +22,8 @@ This blueprint turns a light or switch on when a motion or occupancy sensor dete
 
 ### SwitchBot CO2 Meter
 
-This blueprint monitors a SwitchBot CO2 sensor and triggers different actions based on three air quality zones. When CO2 rises above a high threshold (default 1000 ppm), air quality is poor and it runs one action such as turning on ventilation or a warning light. When CO2 drops below a low threshold (default 1400 ppm), air quality is good and it runs a second action. When CO2 is between the two thresholds, air quality is acceptable and it runs a third action, allowing you to automate the full cycle of air quality response.
+This blueprint monitors a SwitchBot CO2 sensor and triggers different actions based on three air quality zones. When CO2 rises above a high threshold (default 1000 ppm), air quality is poor and it runs one action such as turning on ventilation or a warning light. When CO2 drops below a low threshold (default 1400 ppm), air quality is good and it runs a second action. When CO2 is between the two thresholds, air quality is acceptable and it runs a third action, allowing you to automate the full cycle of air quality response. The blueprint also supports up to four configurable time-of-day periods, so you can vary the actions for each zone across the day.
+
+### SwitchBot CO2 Meter with Light Sensor
+
+A variant of the SwitchBot CO2 Meter blueprint that uses an illuminance sensor instead of time-of-day periods to pick between two action sets. When ambient light is above a configurable threshold (bright), one set of CO2 zone actions runs; when below (dim), another set runs. This is useful when room usage and lighting better reflect when different responses are appropriate than fixed clock times — for example, running silent actions whenever the room is dark regardless of time.

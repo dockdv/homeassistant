@@ -1,0 +1,181 @@
+blueprint:
+  name: SwitchBot CO2 Meter with Light Sensor
+  description: >
+    Monitors a SwitchBot CO2 sensor and triggers actions based on three zones
+    (above high, below low, within range). A separate light sensor determines
+    which set of actions runs, letting you respond differently when the room
+    is bright vs. dim.
+  domain: automation
+
+  input:
+    co2_sensor:
+      name: CO2 sensor
+      description: The SwitchBot CO2 sensor entity that reports ppm.
+      selector:
+        entity:
+          domain: sensor
+          device_class: carbon_dioxide
+
+    light_sensor:
+      name: Light sensor
+      description: Illuminance sensor used to decide which action set to run.
+      selector:
+        entity:
+          domain: sensor
+          device_class: illuminance
+
+    light_threshold:
+      name: Light threshold (lux)
+      description: >
+        When the light sensor value is at or above this threshold, the
+        "bright" actions run. When below, the "dim" actions run.
+      default: 50
+      selector:
+        number:
+          min: 0
+          max: 10000
+          step: 1
+          unit_of_measurement: lx
+          mode: box
+
+    trigger_mode:
+      name: Trigger mode
+      description: >
+        "value_change" triggers whenever the sensor reports a new value.
+        "periodic" triggers at a fixed interval regardless of value changes.
+      default: value_change
+      selector:
+        select:
+          options:
+            - value_change
+            - periodic
+
+    trigger_interval:
+      name: Trigger interval (seconds)
+      description: How often to check the CO2 level when trigger mode is "periodic".
+      default: 30
+      selector:
+        number:
+          min: 5
+          max: 3600
+          step: 5
+          unit_of_measurement: seconds
+          mode: box
+
+    high_threshold:
+      name: High threshold (ppm)
+      description: CO2 level above which the "above high" action is triggered.
+      default: 1400
+      selector:
+        number:
+          min: 400
+          max: 5000
+          step: 50
+          unit_of_measurement: ppm
+          mode: box
+
+    low_threshold:
+      name: Low threshold (ppm)
+      description: CO2 level below which the "below low" action is triggered.
+      default: 1000
+      selector:
+        number:
+          min: 400
+          max: 5000
+          step: 50
+          unit_of_measurement: ppm
+          mode: box
+
+    # ─────────────── Bright (light ≥ threshold) ───────────────
+    action_bright_above_high:
+      name: Bright - action when above high (Poor)
+      default: []
+      selector:
+        action: {}
+    action_bright_below_low:
+      name: Bright - action when below low (Good)
+      default: []
+      selector:
+        action: {}
+    action_bright_within_range:
+      name: Bright - action when within range (Acceptable)
+      default: []
+      selector:
+        action: {}
+
+    # ─────────────── Dim (light < threshold) ───────────────
+    action_dim_above_high:
+      name: Dim - action when above high (Poor)
+      default: []
+      selector:
+        action: {}
+    action_dim_below_low:
+      name: Dim - action when below low (Good)
+      default: []
+      selector:
+        action: {}
+    action_dim_within_range:
+      name: Dim - action when within range (Acceptable)
+      default: []
+      selector:
+        action: {}
+
+mode: single
+
+variables:
+  sensor_entity: !input co2_sensor
+  light_entity: !input light_sensor
+  light_thr: !input light_threshold
+  high: !input high_threshold
+  low: !input low_threshold
+  mode: !input trigger_mode
+  interval: !input trigger_interval
+
+trigger:
+  - platform: state
+    entity_id: !input co2_sensor
+    id: value_change
+
+  - platform: time_pattern
+    seconds: "/1"
+    id: periodic
+
+condition:
+  - condition: template
+    value_template: >
+      {% if trigger.id == 'value_change' %}
+        {{ mode == 'value_change' }}
+      {% else %}
+        {{ mode == 'periodic' and
+           (state_attr(this.entity_id, 'last_triggered') is none or
+            (now() - state_attr(this.entity_id, 'last_triggered')).total_seconds() >= interval) }}
+      {% endif %}
+
+action:
+  - variables:
+      co2: "{{ states(sensor_entity) | float(0) }}"
+      light: "{{ states(light_entity) | float(0) }}"
+      zone: >-
+        {%- set v = states(sensor_entity) | float(0) -%}
+        {%- if v > (high | float) -%}above_high
+        {%- elif v < (low | float) -%}below_low
+        {%- else -%}within_range
+        {%- endif -%}
+      light_state: >-
+        {%- if (states(light_entity) | float(0)) >= (light_thr | float) -%}bright
+        {%- else -%}dim
+        {%- endif -%}
+  - choose:
+      - conditions: "{{ light_state == 'bright' and zone == 'above_high' }}"
+        sequence: !input action_bright_above_high
+      - conditions: "{{ light_state == 'bright' and zone == 'below_low' }}"
+        sequence: !input action_bright_below_low
+      - conditions: "{{ light_state == 'bright' and zone == 'within_range' }}"
+        sequence: !input action_bright_within_range
+
+      - conditions: "{{ light_state == 'dim' and zone == 'above_high' }}"
+        sequence: !input action_dim_above_high
+      - conditions: "{{ light_state == 'dim' and zone == 'below_low' }}"
+        sequence: !input action_dim_below_low
+      - conditions: "{{ light_state == 'dim' and zone == 'within_range' }}"
+        sequence: !input action_dim_within_range
