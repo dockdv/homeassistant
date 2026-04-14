@@ -4,18 +4,23 @@ blueprint:
     Linearly maps an illuminance sensor reading to a light's brightness.
     Given a sensor range (min/max lux) and a brightness range (min/max %),
     the bulb brightness is interpolated from the current sensor value.
-    To invert the mapping (darker room = brighter bulb), set brightness_min
-    higher than brightness_max.
+    Supports multiple light sensors (up to 3 recommended) — the highest
+    lux reading across all selected sensors is used. To invert the mapping
+    (darker room = brighter bulb), set brightness_min higher than brightness_max.
   domain: automation
 
   input:
-    light_sensor:
-      name: Light sensor
-      description: Illuminance sensor that drives the brightness.
+    light_sensors:
+      name: Light sensors
+      description: >
+        One or more illuminance sensors. The highest lux value across all
+        selected sensors is used to compute brightness. Unknown or
+        unavailable sensors are ignored.
       selector:
         entity:
           domain: sensor
           device_class: illuminance
+          multiple: true
 
     target_light:
       name: Target light
@@ -97,7 +102,7 @@ blueprint:
 mode: single
 
 variables:
-  sensor_entity: !input light_sensor
+  sensor_entities: !input light_sensors
   s_min: !input sensor_min
   s_max: !input sensor_max
   b_min: !input brightness_min
@@ -107,7 +112,7 @@ variables:
 
 trigger:
   - platform: state
-    entity_id: !input light_sensor
+    entity_id: !input light_sensors
     id: value_change
 
   - platform: time_pattern
@@ -128,7 +133,14 @@ condition:
 action:
   - variables:
       brightness: >-
-        {%- set v = states(sensor_entity) | float(0) -%}
+        {%- set ns = namespace(vals=[]) -%}
+        {%- for s in sensor_entities -%}
+          {%- set sv = states(s) -%}
+          {%- if sv not in ['unknown', 'unavailable', 'none', None] -%}
+            {%- set ns.vals = ns.vals + [sv | float(0)] -%}
+          {%- endif -%}
+        {%- endfor -%}
+        {%- set v = (ns.vals | max) if ns.vals | length > 0 else 0 -%}
         {%- set smin = s_min | float -%}
         {%- set smax = s_max | float -%}
         {%- set bmin = b_min | float -%}

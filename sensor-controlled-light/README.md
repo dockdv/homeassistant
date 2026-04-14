@@ -13,6 +13,10 @@ ratio       = (sensor_value − sensor_min) / (sensor_max − sensor_min)
 
 The ratio and the final brightness are both clamped so that sensor values outside the configured range simply pin the bulb at the nearest configured brightness.
 
+### Multiple sensors
+
+You can select **one or more illuminance sensors** (up to 3 recommended). The blueprint takes the **highest** current lux value across all selected sensors and uses that as the sensor value. Sensors reporting `unknown` or `unavailable` are ignored. The automation re-evaluates whenever **any** of the selected sensors changes.
+
 ### Example
 
 | Sensor min | Sensor max | Brightness min | Brightness max | At 0 lx | At 250 lx | At 500 lx |
@@ -32,7 +36,7 @@ To make the bulb brighten as the room gets darker, set **brightness_min > bright
 ---
 
 ## Prerequisites
-* An **illuminance sensor** (any sensor with `device_class: illuminance`)
+* One or more **illuminance sensors** (any sensor with `device_class: illuminance`)
 * A **dimmable light** entity
 
 ---

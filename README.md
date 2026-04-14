@@ -30,4 +30,4 @@ A simpler, purpose-built variant that turns a single RGB light into a CO2 qualit
 
 ### Sensor-Controlled Light
 
-This blueprint linearly maps an illuminance sensor reading to a bulb's brightness. You configure a sensor range (min/max lux) and a brightness range (min/max %), and the blueprint interpolates the bulb's brightness from the current sensor value. Values outside the sensor range are clamped to the nearest configured brightness. By setting the minimum brightness higher than the maximum, the mapping can be inverted so the bulb brightens as the room gets darker.
+This blueprint linearly maps an illuminance sensor reading to a bulb's brightness. You configure a sensor range (min/max lux) and a brightness range (min/max %), and the blueprint interpolates the bulb's brightness from the current sensor value. Values outside the sensor range are clamped to the nearest configured brightness. By setting the minimum brightness higher than the maximum, the mapping can be inverted so the bulb brightens as the room gets darker. Multiple illuminance sensors can be selected (up to 3 recommended) — the highest lux reading across them is used.
