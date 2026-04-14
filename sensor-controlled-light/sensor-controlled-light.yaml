@@ -1,0 +1,152 @@
+blueprint:
+  name: Sensor-Controlled Light
+  description: >
+    Linearly maps an illuminance sensor reading to a light's brightness.
+    Given a sensor range (min/max lux) and a brightness range (min/max %),
+    the bulb brightness is interpolated from the current sensor value.
+    To invert the mapping (darker room = brighter bulb), set brightness_min
+    higher than brightness_max.
+  domain: automation
+
+  input:
+    light_sensor:
+      name: Light sensor
+      description: Illuminance sensor that drives the brightness.
+      selector:
+        entity:
+          domain: sensor
+          device_class: illuminance
+
+    target_light:
+      name: Target light
+      description: The light to control.
+      selector:
+        entity:
+          domain: light
+
+    sensor_min:
+      name: Sensor minimum (lux)
+      description: Sensor value that maps to the minimum brightness.
+      default: 0
+      selector:
+        number:
+          min: 0
+          max: 100000
+          step: 1
+          unit_of_measurement: lx
+          mode: box
+
+    sensor_max:
+      name: Sensor maximum (lux)
+      description: Sensor value that maps to the maximum brightness.
+      default: 500
+      selector:
+        number:
+          min: 0
+          max: 100000
+          step: 1
+          unit_of_measurement: lx
+          mode: box
+
+    brightness_min:
+      name: Minimum brightness (%)
+      default: 10
+      selector:
+        number:
+          min: 1
+          max: 100
+          step: 1
+          unit_of_measurement: "%"
+          mode: slider
+
+    brightness_max:
+      name: Maximum brightness (%)
+      default: 100
+      selector:
+        number:
+          min: 1
+          max: 100
+          step: 1
+          unit_of_measurement: "%"
+          mode: slider
+
+    trigger_mode:
+      name: Trigger mode
+      description: >
+        "value_change" updates the light whenever the sensor reports a new value.
+        "periodic" updates at a fixed interval regardless of sensor changes.
+      default: value_change
+      selector:
+        select:
+          options:
+            - value_change
+            - periodic
+
+    trigger_interval:
+      name: Trigger interval (seconds)
+      description: How often to update the light when trigger mode is "periodic".
+      default: 30
+      selector:
+        number:
+          min: 5
+          max: 3600
+          step: 5
+          unit_of_measurement: seconds
+          mode: box
+
+mode: single
+
+variables:
+  sensor_entity: !input light_sensor
+  s_min: !input sensor_min
+  s_max: !input sensor_max
+  b_min: !input brightness_min
+  b_max: !input brightness_max
+  mode: !input trigger_mode
+  interval: !input trigger_interval
+
+trigger:
+  - platform: state
+    entity_id: !input light_sensor
+    id: value_change
+
+  - platform: time_pattern
+    seconds: "/1"
+    id: periodic
+
+condition:
+  - condition: template
+    value_template: >
+      {% if trigger.id == 'value_change' %}
+        {{ mode == 'value_change' }}
+      {% else %}
+        {{ mode == 'periodic' and
+           (state_attr(this.entity_id, 'last_triggered') is none or
+            (now() - state_attr(this.entity_id, 'last_triggered')).total_seconds() >= interval) }}
+      {% endif %}
+
+action:
+  - variables:
+      brightness: >-
+        {%- set v = states(sensor_entity) | float(0) -%}
+        {%- set smin = s_min | float -%}
+        {%- set smax = s_max | float -%}
+        {%- set bmin = b_min | float -%}
+        {%- set bmax = b_max | float -%}
+        {%- set span = smax - smin -%}
+        {%- if span == 0 -%}
+        {{ bmin | round(0) | int }}
+        {%- else -%}
+          {%- set ratio = (v - smin) / span -%}
+          {%- set ratio = [[ratio, 0] | max, 1] | min -%}
+          {%- set b = bmin + ratio * (bmax - bmin) -%}
+          {%- set lo = [bmin, bmax] | min -%}
+          {%- set hi = [bmin, bmax] | max -%}
+          {%- set b = [[b, lo] | max, hi] | min -%}
+        {{ b | round(0) | int }}
+        {%- endif -%}
+  - service: light.turn_on
+    target:
+      entity_id: !input target_light
+    data:
+      brightness_pct: "{{ brightness | int }}"
