@@ -18,7 +18,7 @@ This blueprint maps up to four button actions from a MOES/Tuya TS004F Zigbee rem
 
 ### Bose TV Speaker Remote (IR)
 
-This blueprint sends Bose TV Speaker IR commands through an IR blaster's text entity when a Zigbee remote button is pressed. It ships with hardcoded base-64 IR payloads for eight commands — On/Off, Volume Up, Volume Down, Mute, Bluetooth, Bass, Dialogue, and TV — but every code can be overridden per-instance if your unit uses a different IR set. Each command has its own remote device, button subtype, and IR code, so you can drive all eight commands from a single 8-button remote, from eight single-button remotes, or from any mix in between.
+This blueprint sends Bose TV Speaker IR commands through an IR blaster's text entity when a Zigbee remote button is pressed. It implements four commands — On/Off, Volume Up, Volume Down, and Mute — with hardcoded base-64 IR payloads that can be overridden per-instance if your unit uses a different IR set. Each command has its own remote device, button subtype, and IR code, so you can drive all four commands from a single 4-button remote, from four single-button remotes, or from any mix in between. The blueprint's README also lists additional Bose codes (Bluetooth, Bass, Dialogue, TV) for reference — these are captured but not wired into the blueprint.
 
 ### Motion Sensor Auto Light Off
 

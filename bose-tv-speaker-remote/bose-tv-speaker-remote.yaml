@@ -3,8 +3,8 @@ blueprint:
   description: >
     Send Bose TV Speaker IR commands through an IR blaster text entity.
     Each command has its own Zigbee remote device, button subtype, and
-    IR code, so you can drive all eight commands from a single 8-button
-    remote, from eight single-button remotes, or from any mix. Default
+    IR code, so you can drive all four commands from a single 4-button
+    remote, from four single-button remotes, or from any mix. Default
     IR payloads are included for the Bose TV Speaker; override any code
     per-instance if your unit uses a different IR set.
   domain: automation
@@ -85,74 +85,6 @@ blueprint:
       selector:
         text: {}
 
-    # ─────────────── Bluetooth ───────────────
-    bluetooth_device:
-      name: Bluetooth - remote device
-      selector:
-        device:
-          integration: mqtt
-    bluetooth_subtype:
-      name: Bluetooth - button subtype
-      default: "1_single"
-      selector:
-        text: {}
-    bluetooth_code:
-      name: Bluetooth - IR code
-      default: "D9oDxQUfAsUF9AH0AR8C9AHgCQGAGwH0AUAHBcUFHwLFBUAH4AEDQAEBCcdARwH0AUADA/QBHwLgAQPgAQGAGwH0AUAH4AUDCR8CxQX0AfQB9AE="
-      selector:
-        text: {}
-
-    # ─────────────── Bass ───────────────
-    bass_device:
-      name: Bass - remote device
-      selector:
-        device:
-          integration: mqtt
-    bass_subtype:
-      name: Bass - button subtype
-      default: "1_single"
-      selector:
-        text: {}
-    bass_code:
-      name: Bass - IR code
-      default: "BdEDyQUSAkADAeEB4AkD4AMXQAuAAwHhAcADAeEBgBMBDcfgC0fgAQFALwPhARICQAMByQXgCQMH4QHhAckF4QE="
-      selector:
-        text: {}
-
-    # ─────────────── Dialogue ───────────────
-    dialogue_device:
-      name: Dialogue - remote device
-      selector:
-        device:
-          integration: mqtt
-    dialogue_subtype:
-      name: Dialogue - button subtype
-      default: "1_single"
-      selector:
-        text: {}
-    dialogue_code:
-      name: Dialogue - IR code
-      default: "BfoDygUiAkADAesB4A8DgAEBygXgDwMDIgLVxuADR+APAQEiAkADA8oF6wHgDAMCBesB"
-      selector:
-        text: {}
-
-    # ─────────────── TV ───────────────
-    tv_device:
-      name: TV - remote device
-      selector:
-        device:
-          integration: mqtt
-    tv_subtype:
-      name: TV - button subtype
-      default: "1_single"
-      selector:
-        text: {}
-    tv_code:
-      name: TV - IR code
-      default: "B/QDwgUTAtwB4AUDQBPAA0AbA8IF3AGAA0ALAxMC3AHgAQNADwHnxsBHwAEBEwJAA0AbwAPgBw8TwgXcAdwBEwLcARMC3AETAsIFEwI="
-      selector:
-        text: {}
-
 mode: single
 
 variables:
@@ -161,10 +93,6 @@ variables:
     vol_up: !input vol_up_code
     vol_down: !input vol_down_code
     mute: !input mute_code
-    bluetooth: !input bluetooth_code
-    bass: !input bass_code
-    dialogue: !input dialogue_code
-    tv: !input tv_code
 
 trigger:
   - platform: device
@@ -194,34 +122,6 @@ trigger:
     type: action
     subtype: !input mute_subtype
     id: mute
-
-  - platform: device
-    domain: mqtt
-    device_id: !input bluetooth_device
-    type: action
-    subtype: !input bluetooth_subtype
-    id: bluetooth
-
-  - platform: device
-    domain: mqtt
-    device_id: !input bass_device
-    type: action
-    subtype: !input bass_subtype
-    id: bass
-
-  - platform: device
-    domain: mqtt
-    device_id: !input dialogue_device
-    type: action
-    subtype: !input dialogue_subtype
-    id: dialogue
-
-  - platform: device
-    domain: mqtt
-    device_id: !input tv_device
-    type: action
-    subtype: !input tv_subtype
-    id: tv
 
 action:
   - service: text.set_value
