@@ -1,0 +1,154 @@
+blueprint:
+  name: Bose TV Speaker Remote (IR)
+  description: >
+    Send Bose TV Speaker IR commands through an IR blaster text entity.
+    Each command is wired to a fully custom trigger, so you can fire it
+    from any source — Zigbee remote button, dashboard tap, voice
+    assistant, state change, schedule, etc. Default IR payloads are
+    included for the Bose TV Speaker; override any code per-instance
+    if your unit uses a different IR set. Leave a trigger empty to
+    disable that command.
+  domain: automation
+
+  input:
+    text_entity:
+      name: IR command text entity
+      description: The text entity your IR blaster watches and auto-sends.
+      selector:
+        entity:
+          domain: text
+
+    # ─────────────── On/Off ───────────────
+    on_off_trigger:
+      name: On/Off - trigger
+      description: Trigger(s) that fire the On/Off IR command.
+      default: []
+      selector:
+        trigger: {}
+    on_off_code:
+      name: On/Off - IR code
+      default: "CfEDwgUcAvABHALAB8AL4AcPBfAB8AHCBYADwAHADwXxxvEDwgXgASPAAUATA8IF8AHAAQnCBRwC8AHwAcIFgAPAAQfCBfABwgUcAg=="
+      selector:
+        text: {}
+
+    # ─────────────── Volume Up ───────────────
+    vol_up_trigger:
+      name: Volume Up - trigger
+      default: []
+      selector:
+        trigger: {}
+    vol_up_code:
+      name: Volume Up - IR code
+      default: "B/gDwQUOAtIB4A0DQBvgEwPANwP4xvgDQCfAD+AFBwHSAUAbAsEFbCADQAfgCQMB0gGAAwD44AJHQAFAF0ABQAdAA+ALO+ADEwfSAQ4C0gEOAg=="
+      selector:
+        text: {}
+
+    # ─────────────── Volume Down ───────────────
+    vol_down_trigger:
+      name: Volume Down - trigger
+      default: []
+      selector:
+        trigger: {}
+    vol_down_code:
+      name: Volume Down - IR code
+      default: "BfMDyQXxAeABAQEnAuADAwnJBScC8QHxAckF4A0DQAEByQUgIwDGwEcgCwAB4AkBA8kF8QFAAUAH4AEDAycCyQWADwfxAfEByQXxAQ=="
+      selector:
+        text: {}
+
+    # ─────────────── Mute ───────────────
+    mute_trigger:
+      name: Mute - trigger
+      default: []
+      selector:
+        trigger: {}
+    mute_code:
+      name: Mute - IR code
+      default: "BwsEyQUKAtMB4BEDQB8FyQXTAckFQAfgCQMF0wEKAgTHgEdAAUAP4AsD4As74AMTA9MBCgI="
+      selector:
+        text: {}
+
+    # ─────────────── Bluetooth ───────────────
+    bluetooth_trigger:
+      name: Bluetooth - trigger
+      default: []
+      selector:
+        trigger: {}
+    bluetooth_code:
+      name: Bluetooth - IR code
+      default: "D9oDxQUfAsUF9AH0AR8C9AHgCQGAGwH0AUAHBcUFHwLFBUAH4AEDQAEBCcdARwH0AUADA/QBHwLgAQPgAQGAGwH0AUAH4AUDCR8CxQX0AfQB9AE="
+      selector:
+        text: {}
+
+    # ─────────────── Bass ───────────────
+    bass_trigger:
+      name: Bass - trigger
+      default: []
+      selector:
+        trigger: {}
+    bass_code:
+      name: Bass - IR code
+      default: "BdEDyQUSAkADAeEB4AkD4AMXQAuAAwHhAcADAeEBgBMBDcfgC0fgAQFALwPhARICQAMByQXgCQMH4QHhAckF4QE="
+      selector:
+        text: {}
+
+    # ─────────────── Dialogue ───────────────
+    dialogue_trigger:
+      name: Dialogue - trigger
+      default: []
+      selector:
+        trigger: {}
+    dialogue_code:
+      name: Dialogue - IR code
+      default: "BfoDygUiAkADAesB4A8DgAEBygXgDwMDIgLVxuADR+APAQEiAkADA8oF6wHgDAMCBesB"
+      selector:
+        text: {}
+
+    # ─────────────── TV ───────────────
+    tv_trigger:
+      name: TV - trigger
+      default: []
+      selector:
+        trigger: {}
+    tv_code:
+      name: TV - IR code
+      default: "B/QDwgUTAtwB4AUDQBPAA0AbA8IF3AGAA0ALAxMC3AHgAQNADwHnxsBHwAEBEwJAA0AbwAPgBw8TwgXcAdwBEwLcARMC3AETAsIFEwI="
+      selector:
+        text: {}
+
+mode: single
+
+variables:
+  ir_codes:
+    on_off: !input on_off_code
+    vol_up: !input vol_up_code
+    vol_down: !input vol_down_code
+    mute: !input mute_code
+    bluetooth: !input bluetooth_code
+    bass: !input bass_code
+    dialogue: !input dialogue_code
+    tv: !input tv_code
+
+trigger:
+  - id: on_off
+    triggers: !input on_off_trigger
+  - id: vol_up
+    triggers: !input vol_up_trigger
+  - id: vol_down
+    triggers: !input vol_down_trigger
+  - id: mute
+    triggers: !input mute_trigger
+  - id: bluetooth
+    triggers: !input bluetooth_trigger
+  - id: bass
+    triggers: !input bass_trigger
+  - id: dialogue
+    triggers: !input dialogue_trigger
+  - id: tv
+    triggers: !input tv_trigger
+
+action:
+  - service: text.set_value
+    target:
+      entity_id: !input text_entity
+    data:
+      value: "{{ ir_codes[trigger.id] }}"

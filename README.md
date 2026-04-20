@@ -16,6 +16,10 @@ This blueprint automates the power-cycling sequence needed to trigger pairing or
 
 This blueprint maps up to four button actions from a MOES/Tuya TS004F Zigbee remote to base-64 encoded IR commands sent through an IR blaster's text entity. It ships with default IR codes for Westinghouse ceiling-fan receivers (off, speed 1, speed 2, speed 3), but both the remote action subtypes and IR payloads are fully remappable to suit any IR-controlled device.
 
+### Bose TV Speaker Remote (IR)
+
+This blueprint sends Bose TV Speaker IR commands through an IR blaster's text entity. It ships with hardcoded base-64 IR payloads for eight commands — On/Off, Volume Up, Volume Down, Mute, Bluetooth, Bass, Dialogue, and TV — but every code can be overridden per-instance if your unit uses a different IR set. Each command is wired to its own fully custom trigger selector, so you can fire any command from any source: a Zigbee or Z-Wave remote, a dashboard tap, a voice assistant intent, a state change, a schedule, an incoming webhook, etc. Leave a trigger empty to disable that command.
+
 ### Motion Sensor Auto Light Off
 
 This blueprint turns a light or switch on when a motion or occupancy sensor detects activity, then automatically turns it off after a configurable period of no motion. It supports both `motion` and `occupancy` device classes and can target either `light` or `switch` entities. The automation runs in restart mode, so any new motion resets the off timer.
