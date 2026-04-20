@@ -21,8 +21,10 @@ blueprint:
     # ─────────────── On/Off ───────────────
     on_off_trigger:
       name: On/Off - trigger
-      description: Trigger(s) that fire the On/Off IR command.
-      default: []
+      description: Trigger(s) that fire the On/Off IR command. Leave as the default placeholder to disable.
+      default:
+        - trigger: event
+          event_type: bose_never_fires
       selector:
         trigger: {}
     on_off_code:
@@ -34,7 +36,9 @@ blueprint:
     # ─────────────── Volume Up ───────────────
     vol_up_trigger:
       name: Volume Up - trigger
-      default: []
+      default:
+        - trigger: event
+          event_type: bose_never_fires
       selector:
         trigger: {}
     vol_up_code:
@@ -46,7 +50,9 @@ blueprint:
     # ─────────────── Volume Down ───────────────
     vol_down_trigger:
       name: Volume Down - trigger
-      default: []
+      default:
+        - trigger: event
+          event_type: bose_never_fires
       selector:
         trigger: {}
     vol_down_code:
@@ -58,7 +64,9 @@ blueprint:
     # ─────────────── Mute ───────────────
     mute_trigger:
       name: Mute - trigger
-      default: []
+      default:
+        - trigger: event
+          event_type: bose_never_fires
       selector:
         trigger: {}
     mute_code:
@@ -70,7 +78,9 @@ blueprint:
     # ─────────────── Bluetooth ───────────────
     bluetooth_trigger:
       name: Bluetooth - trigger
-      default: []
+      default:
+        - trigger: event
+          event_type: bose_never_fires
       selector:
         trigger: {}
     bluetooth_code:
@@ -82,7 +92,9 @@ blueprint:
     # ─────────────── Bass ───────────────
     bass_trigger:
       name: Bass - trigger
-      default: []
+      default:
+        - trigger: event
+          event_type: bose_never_fires
       selector:
         trigger: {}
     bass_code:
@@ -94,7 +106,9 @@ blueprint:
     # ─────────────── Dialogue ───────────────
     dialogue_trigger:
       name: Dialogue - trigger
-      default: []
+      default:
+        - trigger: event
+          event_type: bose_never_fires
       selector:
         trigger: {}
     dialogue_code:
@@ -106,7 +120,9 @@ blueprint:
     # ─────────────── TV ───────────────
     tv_trigger:
       name: TV - trigger
-      default: []
+      default:
+        - trigger: event
+          event_type: bose_never_fires
       selector:
         trigger: {}
     tv_code:
