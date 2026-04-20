@@ -1,10 +1,12 @@
 # Bose TV Speaker Remote (IR) Blueprint
-*A Home Assistant automation blueprint that sends Bose TV Speaker IR commands through an IR blaster's text entity, wired to fully custom triggers.*
+*A Home Assistant automation blueprint that sends Bose TV Speaker IR commands through an IR blaster's text entity when a Zigbee remote button is pressed.*
 
 ---
 
 ## What it does
-This blueprint maps eight Bose TV Speaker IR commands to eight independent trigger inputs. Each command is fired by writing its base-64 IR payload to a `text` entity that your IR blaster watches and auto-sends. Every trigger is a full HA trigger selector, so any source — Zigbee/Z-Wave remote, dashboard tap, voice assistant, state change, schedule, webhook, script call — can fire any command.
+This blueprint maps eight Zigbee remote button presses to eight Bose TV Speaker IR commands. Each command has its own **remote device + button subtype + IR code** triplet, so you can drive all eight from a single 8-button remote, from eight single-button remotes, or from any mix in between.
+
+When a configured button is pressed, the matching base-64 IR payload is written to the IR blaster's `text` entity and sent.
 
 ### Default IR codes
 
@@ -19,20 +21,18 @@ This blueprint maps eight Bose TV Speaker IR commands to eight independent trigg
 | **Dialogue** | `BfoDygUiAkADAesB4A8DgAEBygXgDwMDIgLVxuADR+APAQEiAkADA8oF6wHgDAMCBesB` |
 | **TV** | `B/QDwgUTAtwB4AUDQBPAA0AbA8IF3AGAA0ALAxMC3AHgAQNADwHnxsBHwAEBEwJAA0AbwAPgBw8TwgXcAdwBEwLcARMC3AETAsIFEwI=` |
 
-Every code is a per-command text input, so you can override any default per-instance if your unit uses a different IR set.
+Every code is a per-command text input, so you can override any default if your hardware uses a different IR set.
 
-### Custom triggers
+### Subtype strings
 
-Each of the eight commands exposes a **trigger selector** input. You can attach one or more triggers of any type — MQTT device triggers from a Zigbee remote, ZHA events, state changes, dashboard buttons, time/schedule triggers, webhooks, etc. Leave a trigger empty to disable that command.
-
-Dispatch uses HA's grouped-trigger syntax (each `!input` group carries an `id`), which requires **Home Assistant 2024.10 or later**.
+The subtype is the action string Zigbee2MQTT publishes when a button is pressed (e.g. `1_single`, `2_single`, `1_double`, `toggle`, etc.). The exact values depend on the remote model — check the HA automation trigger dropdown or the Z2M logs for the remote in question. Every subtype field defaults to `1_single`, which matches a single-press on the first (or only) button of most remotes.
 
 ---
 
 ## Prerequisites
 * An **IR blaster** that is driven by a Home Assistant `text` entity (e.g. an ESPHome-based blaster exposing a text component, or a Broadlink/Xiaomi blaster wrapped with a text helper) and that can emit Bose-compatible IR from line of sight to the speaker
 * A **Bose TV Speaker** (or another device that accepts the same IR codes)
-* One or more **trigger sources** for the commands you want to wire up (Zigbee remote, dashboard button, voice assistant, automation, etc.)
+* One or more **Zigbee remote(s)** paired via Zigbee2MQTT that publish MQTT device triggers
 
 ---
 
@@ -43,10 +43,10 @@ Dispatch uses HA's grouped-trigger syntax (each `!input` group carries an `id`),
 ---
 
 ## Customisation
-* **Override any IR code** per-instance if your hardware uses a different IR set — the defaults above are inputs, not constants.
-* **Attach multiple triggers to a single command** — e.g. wire both a Zigbee remote button and a dashboard tap to Volume Up.
-* **Mix trigger sources freely** — MQTT device triggers, ZHA events, state triggers, and time patterns can all coexist across the eight commands.
-* **Leave commands you don't need empty** — a command with no triggers simply doesn't fire and costs nothing.
+* **Single remote with 8 buttons** — set every `*_device` field to the same remote and give each command a distinct subtype (`1_single`, `2_single`, …).
+* **Eight single-button remotes** — set each `*_device` to a different remote and leave every subtype at `1_single`.
+* **Anything in between** — mix devices and subtypes freely per command.
+* **Override any IR code** per-instance if your hardware uses a different IR set.
 * **Use with any IR-controlled device** — not limited to the Bose TV Speaker; replace the eight default payloads with codes for any IR target.
 
 ---

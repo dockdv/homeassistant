@@ -2,12 +2,11 @@ blueprint:
   name: Bose TV Speaker Remote (IR)
   description: >
     Send Bose TV Speaker IR commands through an IR blaster text entity.
-    Each command is wired to a fully custom trigger, so you can fire it
-    from any source — Zigbee remote button, dashboard tap, voice
-    assistant, state change, schedule, etc. Default IR payloads are
-    included for the Bose TV Speaker; override any code per-instance
-    if your unit uses a different IR set. Leave a trigger empty to
-    disable that command.
+    Each command has its own Zigbee remote device, button subtype, and
+    IR code, so you can drive all eight commands from a single 8-button
+    remote, from eight single-button remotes, or from any mix. Default
+    IR payloads are included for the Bose TV Speaker; override any code
+    per-instance if your unit uses a different IR set.
   domain: automation
 
   input:
@@ -19,14 +18,16 @@ blueprint:
           domain: text
 
     # ─────────────── On/Off ───────────────
-    on_off_trigger:
-      name: On/Off - trigger
-      description: Trigger(s) that fire the On/Off IR command. Leave as the default placeholder to disable.
-      default:
-        - trigger: event
-          event_type: bose_never_fires
+    on_off_device:
+      name: On/Off - remote device
       selector:
-        trigger: {}
+        device:
+          integration: mqtt
+    on_off_subtype:
+      name: On/Off - button subtype
+      default: "1_single"
+      selector:
+        text: {}
     on_off_code:
       name: On/Off - IR code
       default: "CfEDwgUcAvABHALAB8AL4AcPBfAB8AHCBYADwAHADwXxxvEDwgXgASPAAUATA8IF8AHAAQnCBRwC8AHwAcIFgAPAAQfCBfABwgUcAg=="
@@ -34,13 +35,16 @@ blueprint:
         text: {}
 
     # ─────────────── Volume Up ───────────────
-    vol_up_trigger:
-      name: Volume Up - trigger
-      default:
-        - trigger: event
-          event_type: bose_never_fires
+    vol_up_device:
+      name: Volume Up - remote device
       selector:
-        trigger: {}
+        device:
+          integration: mqtt
+    vol_up_subtype:
+      name: Volume Up - button subtype
+      default: "1_single"
+      selector:
+        text: {}
     vol_up_code:
       name: Volume Up - IR code
       default: "B/gDwQUOAtIB4A0DQBvgEwPANwP4xvgDQCfAD+AFBwHSAUAbAsEFbCADQAfgCQMB0gGAAwD44AJHQAFAF0ABQAdAA+ALO+ADEwfSAQ4C0gEOAg=="
@@ -48,13 +52,16 @@ blueprint:
         text: {}
 
     # ─────────────── Volume Down ───────────────
-    vol_down_trigger:
-      name: Volume Down - trigger
-      default:
-        - trigger: event
-          event_type: bose_never_fires
+    vol_down_device:
+      name: Volume Down - remote device
       selector:
-        trigger: {}
+        device:
+          integration: mqtt
+    vol_down_subtype:
+      name: Volume Down - button subtype
+      default: "1_single"
+      selector:
+        text: {}
     vol_down_code:
       name: Volume Down - IR code
       default: "BfMDyQXxAeABAQEnAuADAwnJBScC8QHxAckF4A0DQAEByQUgIwDGwEcgCwAB4AkBA8kF8QFAAUAH4AEDAycCyQWADwfxAfEByQXxAQ=="
@@ -62,13 +69,16 @@ blueprint:
         text: {}
 
     # ─────────────── Mute ───────────────
-    mute_trigger:
-      name: Mute - trigger
-      default:
-        - trigger: event
-          event_type: bose_never_fires
+    mute_device:
+      name: Mute - remote device
       selector:
-        trigger: {}
+        device:
+          integration: mqtt
+    mute_subtype:
+      name: Mute - button subtype
+      default: "1_single"
+      selector:
+        text: {}
     mute_code:
       name: Mute - IR code
       default: "BwsEyQUKAtMB4BEDQB8FyQXTAckFQAfgCQMF0wEKAgTHgEdAAUAP4AsD4As74AMTA9MBCgI="
@@ -76,13 +86,16 @@ blueprint:
         text: {}
 
     # ─────────────── Bluetooth ───────────────
-    bluetooth_trigger:
-      name: Bluetooth - trigger
-      default:
-        - trigger: event
-          event_type: bose_never_fires
+    bluetooth_device:
+      name: Bluetooth - remote device
       selector:
-        trigger: {}
+        device:
+          integration: mqtt
+    bluetooth_subtype:
+      name: Bluetooth - button subtype
+      default: "1_single"
+      selector:
+        text: {}
     bluetooth_code:
       name: Bluetooth - IR code
       default: "D9oDxQUfAsUF9AH0AR8C9AHgCQGAGwH0AUAHBcUFHwLFBUAH4AEDQAEBCcdARwH0AUADA/QBHwLgAQPgAQGAGwH0AUAH4AUDCR8CxQX0AfQB9AE="
@@ -90,13 +103,16 @@ blueprint:
         text: {}
 
     # ─────────────── Bass ───────────────
-    bass_trigger:
-      name: Bass - trigger
-      default:
-        - trigger: event
-          event_type: bose_never_fires
+    bass_device:
+      name: Bass - remote device
       selector:
-        trigger: {}
+        device:
+          integration: mqtt
+    bass_subtype:
+      name: Bass - button subtype
+      default: "1_single"
+      selector:
+        text: {}
     bass_code:
       name: Bass - IR code
       default: "BdEDyQUSAkADAeEB4AkD4AMXQAuAAwHhAcADAeEBgBMBDcfgC0fgAQFALwPhARICQAMByQXgCQMH4QHhAckF4QE="
@@ -104,13 +120,16 @@ blueprint:
         text: {}
 
     # ─────────────── Dialogue ───────────────
-    dialogue_trigger:
-      name: Dialogue - trigger
-      default:
-        - trigger: event
-          event_type: bose_never_fires
+    dialogue_device:
+      name: Dialogue - remote device
       selector:
-        trigger: {}
+        device:
+          integration: mqtt
+    dialogue_subtype:
+      name: Dialogue - button subtype
+      default: "1_single"
+      selector:
+        text: {}
     dialogue_code:
       name: Dialogue - IR code
       default: "BfoDygUiAkADAesB4A8DgAEBygXgDwMDIgLVxuADR+APAQEiAkADA8oF6wHgDAMCBesB"
@@ -118,13 +137,16 @@ blueprint:
         text: {}
 
     # ─────────────── TV ───────────────
-    tv_trigger:
-      name: TV - trigger
-      default:
-        - trigger: event
-          event_type: bose_never_fires
+    tv_device:
+      name: TV - remote device
       selector:
-        trigger: {}
+        device:
+          integration: mqtt
+    tv_subtype:
+      name: TV - button subtype
+      default: "1_single"
+      selector:
+        text: {}
     tv_code:
       name: TV - IR code
       default: "B/QDwgUTAtwB4AUDQBPAA0AbA8IF3AGAA0ALAxMC3AHgAQNADwHnxsBHwAEBEwJAA0AbwAPgBw8TwgXcAdwBEwLcARMC3AETAsIFEwI="
@@ -145,22 +167,61 @@ variables:
     tv: !input tv_code
 
 trigger:
-  - id: on_off
-    triggers: !input on_off_trigger
-  - id: vol_up
-    triggers: !input vol_up_trigger
-  - id: vol_down
-    triggers: !input vol_down_trigger
-  - id: mute
-    triggers: !input mute_trigger
-  - id: bluetooth
-    triggers: !input bluetooth_trigger
-  - id: bass
-    triggers: !input bass_trigger
-  - id: dialogue
-    triggers: !input dialogue_trigger
-  - id: tv
-    triggers: !input tv_trigger
+  - platform: device
+    domain: mqtt
+    device_id: !input on_off_device
+    type: action
+    subtype: !input on_off_subtype
+    id: on_off
+
+  - platform: device
+    domain: mqtt
+    device_id: !input vol_up_device
+    type: action
+    subtype: !input vol_up_subtype
+    id: vol_up
+
+  - platform: device
+    domain: mqtt
+    device_id: !input vol_down_device
+    type: action
+    subtype: !input vol_down_subtype
+    id: vol_down
+
+  - platform: device
+    domain: mqtt
+    device_id: !input mute_device
+    type: action
+    subtype: !input mute_subtype
+    id: mute
+
+  - platform: device
+    domain: mqtt
+    device_id: !input bluetooth_device
+    type: action
+    subtype: !input bluetooth_subtype
+    id: bluetooth
+
+  - platform: device
+    domain: mqtt
+    device_id: !input bass_device
+    type: action
+    subtype: !input bass_subtype
+    id: bass
+
+  - platform: device
+    domain: mqtt
+    device_id: !input dialogue_device
+    type: action
+    subtype: !input dialogue_subtype
+    id: dialogue
+
+  - platform: device
+    domain: mqtt
+    device_id: !input tv_device
+    type: action
+    subtype: !input tv_subtype
+    id: tv
 
 action:
   - service: text.set_value
